@@ -49,3 +49,4 @@ class DatabaseCorrection:
         # Закрытие соединений
         first_db_connection.close()
         second_db_connection.close()
+
