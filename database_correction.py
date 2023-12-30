@@ -92,7 +92,7 @@ class DatabaseCorrection:
                 alter_table_query = f"ALTER TABLE {table} ADD COLUMN {column} {column_info}"
                 second_db_cursor.execute(alter_table_query)
 
-        # Получение данных из таблиц базы данных test1 после коррекции
+        # Получение данных из таблиц второй базы данных после коррекции
         after_data = {}
         for table in second_tables:
             second_db_cursor.execute(f"SELECT * FROM {table}")
