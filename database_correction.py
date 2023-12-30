@@ -44,9 +44,29 @@ class DatabaseCorrection:
             # Создание новой таблицы во второй базе данных по образцу из первой базы данных
             second_db_cursor.execute(create_table_query)
 
+        # Коррекция полей существующих таблиц
+        for table in first_tables:
+            # Получение списка полей таблицы из первой базы данных
+            first_db_cursor.execute(f"SHOW COLUMNS FROM {table}")
+            first_columns = [row[0] for row in first_db_cursor.fetchall()]
+
+            # Получение списка полей таблицы из второй базы данных
+            second_db_cursor.execute(f"SHOW COLUMNS FROM {table}")
+            second_columns = [row[0] for row in second_db_cursor.fetchall()]
+
+            # Добавление новых полей в существующую таблицу во второй базе данных
+            new_columns = list(set(first_columns) - set(second_columns))
+            for column in new_columns:
+                # Получение типа данных поля из первой базы данных
+                first_db_cursor.execute(f"SHOW COLUMNS FROM {table} WHERE Field = '{column}'")
+                column_info = first_db_cursor.fetchone()[1]
+
+                # Добавление нового поля в существующую таблицу во второй базе данных
+                alter_table_query = f"ALTER TABLE {table} ADD COLUMN {column} {column_info}"
+                second_db_cursor.execute(alter_table_query)
+
             second_db_connection.commit()
 
         # Закрытие соединений
         first_db_connection.close()
         second_db_connection.close()
-
