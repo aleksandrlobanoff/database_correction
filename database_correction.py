@@ -2,9 +2,11 @@ import mysql.connector
 
 
 class DatabaseCorrection:
+
     def __init__(self, first_db_config, second_db_config):
         self.first_db_config = first_db_config
         self.second_db_config = second_db_config
+        self.second_tables = []
 
     def create_connection(self, db_config):
         connection = None
@@ -32,6 +34,13 @@ class DatabaseCorrection:
         # Получение списка таблиц из второй базы данных
         second_db_cursor.execute("SHOW TABLES")
         second_tables = [row[0] for row in second_db_cursor.fetchall()]
+
+        # Получение данных из таблиц второй базы данных перед коррекцией
+        before_data = {}
+        for table in second_tables:
+            second_db_cursor.execute(f"SELECT * FROM {table}")
+            rows = second_db_cursor.fetchall()
+            before_data[table] = rows
 
         # Коррекция базы данных
         # Добавление новых таблиц
@@ -65,7 +74,27 @@ class DatabaseCorrection:
                 alter_table_query = f"ALTER TABLE {table} ADD COLUMN {column} {column_info}"
                 second_db_cursor.execute(alter_table_query)
 
-            second_db_connection.commit()
+        # Получение данных из таблиц базы данных test1 после коррекции
+        after_data = {}
+        for table in second_tables:
+            second_db_cursor.execute(f"SELECT * FROM {table}")
+            rows = second_db_cursor.fetchall()
+            after_data[table] = rows
+
+        # Проверка изменений в данных
+        success = True
+        for table in second_tables:
+            if before_data[table] != after_data[table]:
+                print(f"В таблице {table} данные были потеряны после корректировки")
+                success = False
+
+        # Сохранение изменений во второй базе данных или откат
+        if success:
+            second_db_connection.commit()  # Сохранение изменений
+            print("Операция завершена успешно")
+        else:
+            second_db_connection.rollback()  # Окат транзакции
+            print("Операция была отменена")
 
         # Закрытие соединений
         first_db_connection.close()
