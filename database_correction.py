@@ -2,13 +2,28 @@ import mysql.connector
 
 
 class DatabaseCorrection:
+    """
+    Класс для корректировки базы данных
+
+    Args:
+        first_db_config (dict): Конфигурация первой базы данных
+        second_db_config (dict): Конфигурация второй базы данных
+    """
 
     def __init__(self, first_db_config, second_db_config):
         self.first_db_config = first_db_config
         self.second_db_config = second_db_config
-        self.second_tables = []
 
     def create_connection(self, db_config):
+        """
+        Создает подключение к базе данных MySQL
+
+        Args:
+            db_config (dict): Конфигурация базы данных
+
+        Returns:
+            mysql.connector.connection.MySQLConnection or None: Объект соединения или None в случае ошибки
+        """
         connection = None
         try:
             connection = mysql.connector.connect(**db_config)
@@ -19,6 +34,9 @@ class DatabaseCorrection:
         return connection
 
     def correct_second_db(self):
+        """
+        Корректирует вторую базу данных
+        """
         # Подключение к первой и второй базам данных
         first_db_connection = self.create_connection(self.first_db_config)
         second_db_connection = self.create_connection(self.second_db_config)
